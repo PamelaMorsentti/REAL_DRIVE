@@ -1,2 +1,21 @@
 <!doctype html>
-<html lang="es"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="theme-color" content="#101820"/><title>REALDRIVE — Prototipo 01</title></head><body><div id="app"></div><script type="module" src="/src/main.ts"></script></body></html>
+<html lang="es">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="theme-color" content="#101820">
+	<title>REALDRIVE — Prototipo 01</title>
+</head>
+<body>
+	<div id="app"></div>
+	<div id="loading-layer" class="loading-layer" hidden aria-live="assertive">
+		<div class="loading-content">
+			<p class="boot-kicker">PROVING GROUNDS 01</p>
+			<strong id="loading-state">INICIALIZANDO SIMULACIÓN</strong>
+			<span class="loading-track"><span></span></span>
+			<button id="loading-retry" type="button" hidden>RECARGAR</button>
+		</div>
+	</div>
+	<script type="module" src="/src/boot.ts"></script>
+</body>
+</html>

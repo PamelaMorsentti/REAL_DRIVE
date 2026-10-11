@@ -13,7 +13,7 @@ app.innerHTML = `
 <div class="help"><kbd>WASD</kbd> conducir · <kbd>Q/E</kbd> marchas · <kbd>M</kbd> caja · <kbd>ESPACIO</kbd> freno · <kbd>C</kbd> cámara · <kbd>R</kbd> recuperar</div>
 <div class="panel telemetry"><div class="eyebrow">TELEMETRÍA EN TIEMPO REAL</div><div class="speedline"><div class="speed" id="speed">000</div><div class="unit">KM/H</div></div><div class="rpmbar"><span id="rpmbar"></span></div><div class="metricrow"><span>RÉGIMEN</span><strong id="rpm">850 RPM</strong></div><div class="metricrow"><span>TRANSMISIÓN</span><strong id="gear">N</strong></div><div class="metricrow"><span>CAJA</span><strong id="transmission-mode">AUTO</strong></div><div class="metricrow"><span>ACELERACIÓN</span><strong id="accel">0.00 m/s²</strong></div><div class="metricrow"><span>SUPERFICIE</span><strong id="surface">ASFALTO</strong></div><div class="metricrow"><span>SIMULACIÓN</span><strong id="sim">ACTIVA</strong></div></div>
 <div class="panel vehicle-tag"><div class="eyebrow">VEHÍCULO ACTUAL · <span id="vehicle-drive">RWD</span></div><div class="vehicle-name" id="vehicle-name">RD SPORT COUPE</div><div class="vehicle-desc" id="vehicle-desc">1.450 kg · 320 CV · TRACCIÓN TRASERA</div><div class="vehicle-switch" role="group" aria-label="Seleccionar vehículo"><button id="select-coupe" type="button" aria-pressed="true">1 · COUPÉ</button><button id="select-rally" type="button" aria-pressed="false">2 · RALLY 4X4</button></div></div>
-<div class="panel circuit-panel"><div class="circuit-heading"><span>PROVING GROUNDS 01</span><strong id="lap-count">VUELTA 01</strong></div><svg id="circuit-map" viewBox="-100 -70 200 140" role="img" aria-label="Minimapa del circuito"><polyline id="track-map"/><g id="checkpoint-markers"></g><path id="player-marker" d="M 0 -4 L 2.5 2.5 L 0 1 L -2.5 2.5 Z"/></svg><div class="circuit-footer"><span id="checkpoint-status">CP 0 / 3</span><time id="lap-time">00:00.0</time></div></div>
+<div class="panel circuit-panel"><div class="circuit-heading"><span>PROVING GROUNDS 01</span><strong id="lap-count">VUELTA 01</strong></div><svg id="circuit-map" viewBox="-100 -112 270 224" role="img" aria-label="Minimapa del circuito"><polyline id="track-map"/><polyline id="dirt-map"/><g id="checkpoint-markers"></g><path id="player-marker" d="M 0 -4 L 2.5 2.5 L 0 1 L -2.5 2.5 Z"/></svg><div class="circuit-footer"><span id="checkpoint-status">CP 0 / 3</span><span class="best-lap">MEJOR <time id="best-lap">--:--.-</time></span><time id="lap-time">00:00.0</time></div></div>
 <div class="status"><b>● SISTEMA ACTIVO</b><br>PROVING GROUNDS · TEST PAD 01<br><span id="fps">-- FPS</span> &nbsp; · &nbsp; <span id="camera">CHASE CAM</span></div><div class="vignette"></div><div class="toast" id="toast">VEHÍCULO RECUPERADO</div></div>`;
 
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x9bb8c7); scene.fog = new THREE.Fog(0x9bb8c7, 100, 520);
@@ -110,6 +110,49 @@ for (let i = 0; i < trackCount; i++) {
     trackSegments.push({ x, z, yaw, length });
     if (i % 3 === 0) { const stripe = new THREE.Mesh(new THREE.BoxGeometry(.16, .012, 2.2), roadLineMat); stripe.position.set(x, .043, z); stripe.rotation.y = yaw; scene.add(stripe) }
 }
+const dirtWidth = 7.5;
+const dirtPathControlPoints: [number, number][] = [
+    [81, 3], [101, 15], [122, 32], [139, 51], [151, 72], [147, 89],
+    [133, 103], [115, 108], [99, 99], [90, 83], [92, 64], [92, 45], [87, 25], [81, -3],
+];
+const dirtPathCurve = new THREE.CatmullRomCurve3(
+    dirtPathControlPoints.map(([x, z]) => new THREE.Vector3(x, terrainSurfaceHeight(x, z) + .05, z)),
+    false,
+    'catmullrom',
+    .35,
+);
+const dirtPathSamples = dirtPathCurve.getSpacedPoints(180);
+const dirtVertices = new Float32Array(dirtPathSamples.length * 6);
+const dirtIndices: number[] = [];
+for (let i = 0; i < dirtPathSamples.length; i++) {
+    const point = dirtPathSamples[i];
+    const next = dirtPathSamples[Math.min(i + 1, dirtPathSamples.length - 1)];
+    const previous = dirtPathSamples[Math.max(i - 1, 0)];
+    const tangentX = next.x - previous.x;
+    const tangentZ = next.z - previous.z;
+    const tangentLength = Math.hypot(tangentX, tangentZ) || 1;
+    const sideX = -tangentZ / tangentLength;
+    const sideZ = tangentX / tangentLength;
+    const height = terrainSurfaceHeight(point.x, point.z) + .05;
+    const left = i * 6;
+    dirtVertices[left] = point.x + sideX * dirtWidth / 2;
+    dirtVertices[left + 1] = height;
+    dirtVertices[left + 2] = point.z + sideZ * dirtWidth / 2;
+    dirtVertices[left + 3] = point.x - sideX * dirtWidth / 2;
+    dirtVertices[left + 4] = height;
+    dirtVertices[left + 5] = point.z - sideZ * dirtWidth / 2;
+    if (i < dirtPathSamples.length - 1) {
+        const a = i * 2, b = a + 1, c = a + 2, d = a + 3;
+        dirtIndices.push(a, c, b, b, c, d);
+    }
+}
+const dirtGeometry = new THREE.BufferGeometry();
+dirtGeometry.setAttribute('position', new THREE.BufferAttribute(dirtVertices, 3));
+dirtGeometry.setIndex(dirtIndices);
+dirtGeometry.computeVertexNormals();
+const dirtSurface = new THREE.Mesh(dirtGeometry, new THREE.MeshStandardMaterial({ color: 0x776345, roughness: 1, side: THREE.DoubleSide }));
+dirtSurface.receiveShadow = true;
+scene.add(dirtSurface);
 const checkpoints = [0, 30, 60, 90].map((segmentIndex, index) => {
     const segment = trackSegments[segmentIndex];
     const marker = new THREE.Mesh(new THREE.BoxGeometry(roadWidth, .018, .24), new THREE.MeshStandardMaterial({ color: index === 3 ? 0xf0f2e8 : 0x68e0c1, emissive: index === 3 ? 0x343a30 : 0x123d32, roughness: .75 }));
@@ -127,6 +170,8 @@ const routeCheckpoints = checkpoints.slice(0, 3);
 const startGate = checkpoints[3];
 const trackMap = document.querySelector<SVGPolylineElement>('#track-map')!;
 trackMap.setAttribute('points', trackSegments.map(segment => `${segment.x.toFixed(2)},${segment.z.toFixed(2)}`).join(' '));
+const dirtMap = document.querySelector<SVGPolylineElement>('#dirt-map')!;
+dirtMap.setAttribute('points', dirtPathSamples.map(point => `${point.x.toFixed(2)},${point.z.toFixed(2)}`).join(' '));
 const checkpointDots = checkpoints.map((checkpoint, index) => {
     const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     dot.setAttribute('cx', checkpoint.position.x.toFixed(2));
@@ -258,7 +303,7 @@ const vehicleProfiles = {
             gearRatios: [3.35, 2.42, 1.8, 1.37, 1.04, .79], maxRpm: 7_400,
             maxSteeringAngle: .56, brakeTorque: 2_150, handbrakeTorque: 2_850,
             dragCoefficient: .68, rollingResistance: .014,
-            surfaceGrip: (x: number, z: number) => isOnAsphalt(x, z) ? 1.08 : .76,
+            surfaceGrip: (x: number, z: number) => isOnAsphalt(x, z) ? 1.08 : isOnDirtTrack(x, z) ? .68 : .54,
             wheelMounts: [
                 { x: -.99, y: .78, z: -1.43, front: true, driven: false },
                 { x: .99, y: .78, z: -1.43, front: true, driven: false },
@@ -276,7 +321,7 @@ const vehicleProfiles = {
             gearRatios: [3.8, 2.65, 1.92, 1.45, 1.16, .94, .77, .64], maxRpm: 7_100,
             maxSteeringAngle: .5, brakeTorque: 2_700, handbrakeTorque: 3_100,
             dragCoefficient: .82, rollingResistance: .018,
-            surfaceGrip: (x: number, z: number) => isOnAsphalt(x, z) ? 1.05 : .94,
+            surfaceGrip: (x: number, z: number) => isOnAsphalt(x, z) ? 1.05 : isOnDirtTrack(x, z) ? .92 : .76,
             wheelMounts: [
                 { x: -1.08, y: .96, z: -1.48, front: true, driven: true },
                 { x: 1.08, y: .96, z: -1.48, front: true, driven: true },
@@ -295,9 +340,9 @@ let physicsWorld: RAPIER.World | null = null;
 let vehiclePhysics: VehiclePhysics | null = null;
 const previousCollisionHandles = new Set<number>();
 
-// Stable toy-physics driving model: the previous suspension loop was inconsistent and caused the vehicle to float / stall.
+// The gameplay state mirrors the active dynamic Rapier chassis for HUD, race, and camera systems.
 const vehicle = { x: 0, y: 0.1, z: -52, yaw: -Math.PI / 2, speed: 0, rpm: 850, gear: 1, accel: 0 };
-const race = { completedLaps: 0, nextCheckpoint: 0, checkpointsPassed: 0, started: false, startedAt: 0, lastLapSeconds: 0 };
+const race = { completedLaps: 0, nextCheckpoint: 0, checkpointsPassed: 0, started: false, currentLapSeconds: 0, lastLapSeconds: 0, bestLapSeconds: null as number | null };
 let previousPosition = new THREE.Vector2(vehicle.x, vehicle.z);
 const state = { throttle: 0, brake: 0, steer: 0, handbrake: false, reverse: false, manual: false, cam: 0, paused: false, speed: 0, rpm: 850, gear: 1, accel: 0, lastSpeed: 0, damage: 0 };
 const keys = new Set<string>();
@@ -334,7 +379,7 @@ function recover() {
     pendingGearChange = 0;
     previousCollisionHandles.clear();
     previousPosition.set(vehicle.x, vehicle.z);
-    race.nextCheckpoint = 0; race.checkpointsPassed = 0; race.started = false; race.startedAt = 0;
+    race.nextCheckpoint = 0; race.checkpointsPassed = 0; race.started = false; race.currentLapSeconds = 0;
     state.speed = 0; state.rpm = 850; state.gear = 1; state.accel = 0; state.lastSpeed = 0; state.damage = 0; toast('VEHÍCULO RECUPERADO');
 }
 
@@ -378,6 +423,16 @@ function isOnAsphalt(x: number, z: number) {
         || (Math.abs(x) <= 130 && Math.abs(z) <= 95);
 }
 
+function isOnDirtTrack(x: number, z: number) {
+    const halfWidthSquared = (dirtWidth / 2) ** 2;
+    for (const point of dirtPathSamples) {
+        const dx = point.x - x;
+        const dz = point.z - z;
+        if (dx * dx + dz * dz <= halfWidthSquared) return true;
+    }
+    return false;
+}
+
 function crossedGate(from: THREE.Vector2, to: THREE.Vector2, gate: typeof startGate) {
     const fromOffset = from.clone().sub(gate.position);
     const toOffset = to.clone().sub(gate.position);
@@ -390,19 +445,27 @@ function crossedGate(from: THREE.Vector2, to: THREE.Vector2, gate: typeof startG
     return Math.abs(crossingPoint.dot(gate.side)) <= roadWidth / 2;
 }
 
-function updateRaceProgress() {
+function updateRaceProgress(dt: number) {
     const currentPosition = new THREE.Vector2(vehicle.x, vehicle.z);
+    if (race.started) race.currentLapSeconds += dt;
+
     if (crossedGate(previousPosition, currentPosition, startGate)) {
         if (!race.started) {
             race.started = true;
-            race.startedAt = performance.now();
+            race.currentLapSeconds = 0;
         } else if (race.checkpointsPassed === routeCheckpoints.length) {
-            race.lastLapSeconds = (performance.now() - race.startedAt) / 1000;
+            race.lastLapSeconds = race.currentLapSeconds;
+            if (race.bestLapSeconds === null || race.lastLapSeconds < race.bestLapSeconds) race.bestLapSeconds = race.lastLapSeconds;
             race.completedLaps++;
-            race.startedAt = performance.now();
+            race.currentLapSeconds = 0;
             race.checkpointsPassed = 0;
             race.nextCheckpoint = 0;
             toast(`VUELTA ${race.completedLaps} COMPLETADA`);
+        } else {
+            race.currentLapSeconds = 0;
+            race.checkpointsPassed = 0;
+            race.nextCheckpoint = 0;
+            toast('VUELTA INCOMPLETA · REINICIADA');
         }
     }
 
@@ -415,6 +478,12 @@ function updateRaceProgress() {
     previousPosition.copy(currentPosition);
 }
 
+function formatLapTime(seconds: number | null) {
+    if (seconds === null) return '--:--.-';
+    const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+    return `${minutes}:${(seconds % 60).toFixed(1).padStart(4, '0')}`;
+}
+
 let toastTimer = 0;
 function toast(s: string) {
     const el = document.querySelector('#toast')!;
@@ -424,7 +493,7 @@ function toast(s: string) {
     toastTimer = window.setTimeout(() => el.classList.remove('show'), 1500);
 }
 
-(window as any).__REALDRIVE__ = { vehicle, get wheels() { return wheels; }, get activeVehicleId() { return activeVehicleId; }, get activeCar() { return activeCar; }, get physics() { return vehiclePhysics; }, terrainHeightAt };
+(window as any).__REALDRIVE__ = { vehicle, get wheels() { return wheels; }, get activeVehicleId() { return activeVehicleId; }, get activeCar() { return activeCar; }, get physics() { return vehiclePhysics; }, get race() { return race; }, get previousPosition() { return previousPosition; }, updateRaceProgress, routeCheckpoints, startGate, terrainHeightAt, isOnDirtTrack };
 
 async function init() {
     await RAPIER.init();
@@ -551,7 +620,7 @@ async function init() {
             }
         }
 
-        updateRaceProgress();
+        updateRaceProgress(dt);
         if (Math.abs(vehicle.x) > 190 || Math.abs(vehicle.z) > 190 || vehicle.y < -8 || vehicle.y > 12) recover();
     }
 
@@ -579,9 +648,8 @@ async function init() {
         document.querySelector('#surface')!.textContent = isOnAsphalt(vehicle.x, vehicle.z) ? 'ASFALTO' : 'TIERRA';
         document.querySelector('#lap-count')!.textContent = `VUELTA ${String(race.completedLaps + 1).padStart(2, '0')}`;
         document.querySelector('#checkpoint-status')!.textContent = `CP ${race.checkpointsPassed} / ${routeCheckpoints.length}`;
-        const lapSeconds = race.started ? (performance.now() - race.startedAt) / 1000 : race.lastLapSeconds;
-        const lapMinutes = Math.floor(lapSeconds / 60).toString().padStart(2, '0');
-        document.querySelector('#lap-time')!.textContent = `${lapMinutes}:${(lapSeconds % 60).toFixed(1).padStart(4, '0')}`;
+        document.querySelector('#lap-time')!.textContent = formatLapTime(race.currentLapSeconds);
+        document.querySelector('#best-lap')!.textContent = formatLapTime(race.bestLapSeconds);
         for (const [index, dot] of checkpointDots.entries()) dot.classList.toggle('is-next', index === race.nextCheckpoint && index < routeCheckpoints.length);
         document.querySelector('#player-marker')!.setAttribute('transform', `translate(${vehicle.x.toFixed(2)} ${vehicle.z.toFixed(2)}) rotate(${THREE.MathUtils.radToDeg(-vehicle.yaw).toFixed(1)})`);
 
@@ -607,9 +675,10 @@ async function init() {
     requestAnimationFrame(frame);
 }
 
-init().catch(e => {
+export const gameReady = init().catch(e => {
     console.error(e);
     toast('ERROR INICIANDO FÍSICA · REVISAR CONSOLA');
+    throw e;
 });
 window.addEventListener('resize', () => {
     camera.aspect = innerWidth / innerHeight;

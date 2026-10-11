@@ -39,6 +39,14 @@
     stroke-linejoin: round;
 }
 
+#dirt-map {
+    fill: none;
+    stroke: #c29b62;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 #checkpoint-markers circle {
     fill: #25383a;
     stroke: #b2c1c2;
@@ -74,6 +82,18 @@
     font-variant-numeric: tabular-nums;
 }
 
+.circuit-footer .best-lap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #8fa2aa;
+    font-size: 8px;
+}
+
+.circuit-footer #best-lap {
+    color: #68e0c1;
+}
+
 @media (max-width: 700px) {
     .circuit-panel {
         top: 72px;
@@ -86,5 +106,10 @@
     .circuit-footer,
     .circuit-heading strong {
         font-size: 8px;
+    }
+
+    .circuit-footer .best-lap {
+        gap: 3px;
+        font-size: 7px;
     }
 }

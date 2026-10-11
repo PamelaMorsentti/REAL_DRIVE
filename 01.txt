@@ -3,6 +3,9 @@
 Qué y por qué
 La fase actual deja el Rally 4x4 como próximo contenido. Añadirlo permitirá probar tracción 4x4 y adherencia fuera del asfalto sin afectar el coupé existente.
 
+Estado: COMPLETADO
+La ruta de tierra está dibujada fuera del pad, figura en el minimapa y utiliza el collider del heightfield. El Coupé y el Rally tienen adherencia específica para asfalto, tierra y suelo suelto.
+
 Hecho cuando
 El Rally 4x4 se puede elegir y conducir junto al RD Sport Coupe.
 La pista incluye una zona de tierra con colisión y agarre ajustado a esa superficie.
@@ -12,6 +15,8 @@ Los controles y la telemetría siguen funcionando para ambos vehículos.
 Qué y por qué
 El circuito de pruebas ya permite conducir libremente. Los puntos de control, el cronómetro y un mejor tiempo visible darán a cada prueba un objetivo claro.
 
+Estado: COMPLETADO
+
 Hecho cuando
 La pista tiene una salida/meta y puntos de control que validan el orden de paso.
 Se muestran el tiempo actual y el mejor tiempo de la sesión.
@@ -20,6 +25,8 @@ Reiniciar o pausar no registra vueltas incompletas como resultados válidos.
 #3 - Reducir el tiempo de carga antes de empezar a conducir
 Qué y por qué
 La compilación agrupa Three.js, Rapier y la interfaz en un archivo JavaScript inicial de unos 5 MB. Cargar el motor 3D al iniciar la prueba puede dejar el panel listo antes en conexiones lentas.
+
+Estado: COMPLETADO
 
 Hecho cuando
 La interfaz inicial se muestra antes de descargar el motor 3D.

@@ -1,0 +1,80 @@
+:root {
+  color-scheme: dark;
+  font-family: "Bahnschrift", "Arial Narrow", sans-serif;
+  color: #edf3f5;
+  background: #101820;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { width: 100%; min-height: 100%; margin: 0; }
+body { min-height: 100vh; overflow: hidden; background: #101820; }
+button { font: inherit; }
+
+.boot-shell {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 28px 42px 20px;
+  background: linear-gradient(112deg, #101820 0 56%, #172522 56% 100%);
+}
+
+.boot-shell::before {
+  position: absolute;
+  inset: 0 0 0 56%;
+  background: repeating-linear-gradient(0deg, transparent 0 39px, #d4e6df0a 40px), repeating-linear-gradient(90deg, transparent 0 39px, #d4e6df0a 40px);
+  content: "";
+  pointer-events: none;
+}
+
+.boot-header, .boot-footer { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; }
+.boot-brand { color: #edf3f5; font-size: 23px; font-weight: 900; text-decoration: none; }
+.boot-brand span { color: #68e0c1; }
+.boot-build, .boot-footer { color: #9aaab4; font-family: Consolas, monospace; font-size: 10px; letter-spacing: .12em; }
+.boot-build i { display: inline-block; width: 6px; height: 6px; margin: 0 8px; border-radius: 50%; background: #68e0c1; }
+
+.boot-main { position: relative; z-index: 1; display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; max-width: 1180px; width: 100%; margin: 0 auto; }
+.boot-title { padding: 42px 0; }
+.boot-kicker { color: #68e0c1; font: 700 11px Consolas, monospace; letter-spacing: .15em; }
+.boot-kicker span { color: #ff986c; }
+.boot-title h1 { margin: 20px 0 10px; font-size: 84px; line-height: .88; font-weight: 900; letter-spacing: .01em; }
+.boot-title h1 span { display: block; color: #68e0c1; }
+.boot-vehicle { display: flex; gap: 12px; align-items: center; margin: 28px 0; color: #c7d3d7; font: 700 14px Consolas, monospace; letter-spacing: .08em; }
+.boot-vehicle span { padding: 4px 7px; border: 1px solid #68e0c1; color: #68e0c1; font-size: 10px; }
+.start-button { display: flex; align-items: center; justify-content: space-between; gap: 34px; min-width: 245px; padding: 15px 18px; border: 0; border-radius: 3px; background: #68e0c1; color: #102126; font-weight: 800; cursor: pointer; }
+.start-button:hover:not(:disabled) { background: #91f0d7; }
+.start-button:disabled { cursor: wait; opacity: .65; }
+.start-arrow { font-size: 21px; line-height: 14px; }
+.boot-message { min-height: 14px; margin-top: 16px; color: #82949c; font: 10px Consolas, monospace; letter-spacing: .08em; }
+
+.boot-readout { justify-self: end; width: min(100%, 350px); border-top: 1px solid #e5f1ed35; }
+.boot-readout div { display: flex; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid #e5f1ed22; }
+.boot-readout span { color: #95a8ad; font: 10px Consolas, monospace; letter-spacing: .08em; }
+.boot-readout strong { color: #edf3f5; font: 700 11px Consolas, monospace; text-align: right; }
+.boot-footer { padding-top: 14px; border-top: 1px solid #e5f1ed24; }
+
+.loading-layer { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; background: #101820ed; backdrop-filter: blur(8px); }
+.loading-layer[hidden] { display: none; }
+.loading-content { width: min(360px, calc(100vw - 40px)); }
+.loading-content strong { display: block; margin: 12px 0 18px; font-size: 14px; }
+.loading-track { display: block; height: 4px; overflow: hidden; background: #33434a; }
+.loading-track span { display: block; width: 38%; height: 100%; background: #68e0c1; animation: load-sweep 1s ease-in-out infinite alternate; }
+#loading-retry { margin-top: 20px; padding: 10px 14px; border: 1px solid #68e0c1; border-radius: 3px; background: transparent; color: #edf3f5; cursor: pointer; }
+#loading-retry[hidden] { display: none; }
+
+@keyframes load-sweep { to { transform: translateX(165%); } }
+
+@media (max-width: 700px) {
+  .boot-shell { padding: 20px 18px 14px; background: linear-gradient(160deg, #101820 0 62%, #172522 62% 100%); }
+  .boot-shell::before { inset: 62% 0 0; }
+  .boot-main { grid-template-columns: 1fr; align-content: center; gap: 28px; }
+  .boot-title { padding: 30px 0 0; }
+  .boot-title h1 { font-size: 58px; }
+  .boot-readout { justify-self: stretch; width: 100%; }
+  .boot-readout div { padding: 10px 0; }
+  .boot-build { max-width: 145px; text-align: right; line-height: 1.6; }
+  .boot-footer { font-size: 8px; }
+}

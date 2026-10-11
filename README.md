@@ -18,7 +18,7 @@ npm install
 npm run dev
 ```
 
-5. Abrir la URL que muestra Vite, normalmente `http://localhost:5173`.
+5. Abrir la URL que muestra Vite, normalmente `http://localhost:5173`, y pulsar **INICIAR PRUEBA**. Three.js y Rapier se descargan al iniciar.
 
 ## Controles
 - W / flecha arriba: acelerar
@@ -36,10 +36,10 @@ npm run dev
 
 ## Alcance actual
 - Entorno de pruebas provisional, no es aún el circuito final de 3–5 km.
-- Terreno exterior al pad con elevación procedural determinista, malla coloreada y collider trimesh Rapier; el pad y el óvalo conservan su altura plana para no alterar el apoyo ya calibrado.
-- Óvalo de pruebas con minimapa generado desde su trazado, línea de salida, tres checkpoints y cronómetro básico de vueltas.
+- Terreno exterior al pad con elevación procedural determinista, malla coloreada y collider trimesh Rapier. La ruta de tierra aparece en el minimapa y comparte ese collider; el pad y el óvalo conservan su altura plana.
+- Óvalo de pruebas con minimapa generado desde su trazado, línea de salida, tres checkpoints, tiempo actual y mejor vuelta de la sesión. El cronómetro usa tiempo de simulación, se congela al pausar y descarta parciales al recuperar o cruzar meta sin checkpoints válidos.
 - Los checkpoints requieren cruzar las puertas en orden y en el sentido del circuito. El óvalo tiene barreras laterales y el recinto incluye barreras y conos con colliders Rapier; ahora el chasis dinámico recibe los contactos.
-- RD Sport Coupe y RD Rally 4x4 procedurales, seleccionables desde el HUD o con 1/2. El Coupé usa RWD y el Rally distribuye par entre sus cuatro ruedas con perfiles separados; aún no hay diferencial central modelado.
+- RD Sport Coupe y RD Rally 4x4 procedurales, seleccionables desde el HUD o con 1/2. El Coupé usa RWD y el Rally distribuye par entre sus cuatro ruedas con perfiles separados. Ambos diferencian adherencia en asfalto, ruta de tierra y suelo suelto; aún no hay diferencial central modelado.
 - El Coupé tiene una curva de par más llena a bajas RPM y relaciones más cortas para mejorar la salida y la aceleración. La transmisión permite alternar entre cambios automáticos y manuales.
 - Los bordes del óvalo usan fardos visuales deformables: el primer impacto los aplasta, frena el vehículo y desactiva su collider para dejar paso. Es una respuesta arcade, no deformación/material blando simulado.
 - Rapier simula un chasis dinámico, raycasts de suspensión, carga normal y fuerzas longitudinales/laterales limitadas por adherencia. No incluye todavía transferencia de peso avanzada, curva Pacejka, ABS ni daño mecánico.
