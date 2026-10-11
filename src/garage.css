@@ -1,0 +1,28 @@
+.vehicle-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-top: 10px;
+    pointer-events: auto;
+}
+
+.vehicle-switch button {
+    min-height: 28px;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, .05);
+    color: #c7d2d6;
+    font: 700 9px 'Inter', sans-serif;
+    cursor: pointer;
+}
+
+.vehicle-switch button:hover {
+    border-color: #68e0c1;
+    color: #fff;
+}
+
+.vehicle-switch button[aria-pressed="true"] {
+    border-color: #68e0c1;
+    background: #68e0c1;
+    color: #102126;
+}

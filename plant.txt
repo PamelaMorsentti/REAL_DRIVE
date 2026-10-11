@@ -1,0 +1,636 @@
+PROYECTO: REALDRIVE — SIMULADOR DE CONDUCCIÓN Y FÍSICA VEHICULAR 3D PARA NAVEGADOR
+1. ROL Y OBJETIVO
+Actúa como un equipo profesional compuesto por:
+- Un desarrollador senior de videojuegos especializado en JavaScript y TypeScript.
+- Un ingeniero de simulación física vehicular.
+- Un programador experto en Three.js, WebGL y motores de física.
+- Un diseñador de niveles especializado en circuitos automovilísticos y mundos abiertos.
+- Un artista técnico especializado en vehículos 3D, materiales PBR, iluminación y daños por colisión.
+- Un especialista en optimización de videojuegos para navegadores de escritorio.
+Tu misión es crear un videojuego original llamado provisionalmente REALDRIVE, un simulador de conducción vehicular 3D para navegador, inspirado en el concepto de sandbox automovilístico y simulación de daños físicos de BeamNG.drive.
+No copies sus modelos, mapas, texturas, código, interfaz ni otros recursos protegidos. Crea una identidad visual, vehículos, circuitos y sistemas originales.
+El resultado debe ser un videojuego REAL, interactivo y jugable, no una animación, una maqueta estática ni una simple demostración de Three.js.
+El juego debe ejecutarse en una computadora de escritorio moderna desde un navegador, utilizando HTML, CSS, JavaScript o TypeScript y tecnologías web.
+2. TECNOLOGÍAS OBLIGATORIAS
+Utiliza una arquitectura moderna y mantenible:
+- HTML5 para la estructura.
+- CSS3 para la interfaz.
+- TypeScript para la lógica principal.
+- Three.js para renderizado 3D.
+- Rapier3D para física rígida, colisiones y cuerpos dinámicos.
+- Vite para desarrollo y compilación.
+- GLTF/GLB para importar modelos 3D.
+- Materiales PBR para carrocerías, asfalto, neumáticos, vidrio y terreno.
+- Web Audio API para motor, neumáticos, colisiones y ambiente.
+- LocalStorage para guardar opciones y progreso básico.
+Evalúa una implementación híbrida si resulta necesaria para conseguir una simulación vehicular más convincente.
+No supongas que un motor de física rígida proporciona automáticamente una simulación vehicular realista. Implementa explícitamente la dinámica de ruedas, suspensión, dirección, frenado, tracción y transferencia de peso.
+Utiliza versiones estables y compatibles de las dependencias. Incluye todas las dependencias en package.json y configura Vite correctamente.
+No dependas de servicios de pago ni de claves API.
+El juego debe poder ejecutarse localmente mediante npm install y npm run dev.
+3. CONCEPTO DEL JUEGO
+Crear un simulador de conducción en tercera y primera persona, con:
+- Mundo 3D explorable.
+- Conducción libre.
+- Circuito de pruebas.
+- Dos vehículos seleccionables.
+- Física vehicular convincente.
+- Suspensión visible y funcional.
+- Colisiones físicas.
+- Deformación visual progresiva de carrocería.
+- Daños en componentes.
+- Neumáticos con pérdida de adherencia.
+- Polvo, humo, partículas y marcas de neumáticos.
+- Cámara cinematográfica y cámara interior.
+- Sonidos dinámicos.
+- Reinicio y recuperación del vehículo.
+- Interfaz de telemetría.
+- Rendimiento adecuado para un navegador de escritorio.
+Prioriza la calidad de conducción, el comportamiento físico y la coherencia visual antes que la cantidad de contenido.
+4. PRIMER MUNDO: COMPLEJO DE PRUEBAS AUTOMOTRICES
+Diseña y construye el primer mundo explorable, denominado PROVING GROUNDS 01.
+Debe ser un complejo automovilístico ficticio ubicado en un valle amplio, con montañas lejanas, vegetación, terreno irregular y cielo dinámico.
+El entorno debe sentirse como un lugar real y no como una pista plana rodeada de primitivas geométricas.
+4.1. Dimensiones y distribución
+Diseña un terreno inicial de aproximadamente 2 × 2 kilómetros, con un área de conducción útil de varios cientos de metros en cada dirección.
+Las dimensiones son objetivos iniciales y pueden ajustarse para mantener el rendimiento.
+El mundo debe incluir:
+A. CIRCUITO PRINCIPAL
+- Circuito asfaltado de aproximadamente 3 a 5 kilómetros de longitud.
+- Recta principal de aceleración.
+- Curvas rápidas de radio amplio.
+- Curvas cerradas.
+- Curvas enlazadas.
+- Horquillas.
+- Cambios de elevación.
+- Peraltes moderados.
+- Zonas de frenado.
+- Pianos y bordes de pista.
+- Áreas de escape.
+- Barreras de seguridad.
+- Carteles y señalización.
+- Línea de salida y llegada.
+- Sectores claramente diferenciados.
+B. ZONA DE MANIOBRAS
+- Plataforma amplia de asfalto.
+- Espacio para hacer trompos.
+- Pruebas de aceleración y frenado.
+- Zona de slalom con conos físicos.
+- Espacio para practicar estacionamiento.
+- Pruebas de cambio de dirección.
+- Marcas de neumáticos persistentes durante la sesión.
+C. ZONA OFF-ROAD
+- Caminos de tierra.
+- Pendientes pronunciadas.
+- Pequeños saltos.
+- Badenes.
+- Zanjas poco profundas.
+- Montículos.
+- Terreno con irregularidades.
+- Barro o superficies de baja adherencia, si la implementación física lo permite.
+D. ZONA DE IMPACTO
+- Barreras de hormigón.
+- Muros de prueba.
+- Barriles.
+- Conos.
+- Guardarraíles.
+- Objetos físicos que puedan desplazarse cuando reciben un impacto.
+- Diferentes escenarios para estudiar daños a distintas velocidades.
+E. INSTALACIONES
+- Boxes.
+- Garaje.
+- Torre de control.
+- Estacionamiento.
+- Taller.
+- Cartelería.
+- Vallas.
+- Iluminación exterior.
+- Elementos de ambientación industrial.
+4.2. Calidad del terreno
+El terreno no debe ser una superficie verde uniforme.
+Genera variaciones de elevación mediante una función de altura coherente y reproducible.
+Utiliza geometría optimizada, texturas PBR y transiciones naturales entre asfalto, grava, tierra y césped.
+Evita los bordes artificiales y los cambios bruscos de material.
+Incorpora un horizonte con montañas, nubes y vegetación distribuida de forma eficiente.
+Utiliza instancing para árboles, piedras, postes, conos y elementos repetidos.
+La pista debe seguir un trazado continuo, sin interrupciones, cruces imposibles ni geometría que provoque que los vehículos atraviesen el suelo.
+4.3. Diseño técnico del circuito
+Define el recorrido mediante una spline o una secuencia de puntos de control.
+Genera la geometría de la calzada a partir de esa trayectoria.
+Las curvas deben tener transiciones suaves de curvatura y elevación.
+Calcula la anchura de la pista a partir de una configuración centralizada.
+Las barreras, pianos, marcas viales y señalización deben adaptarse al recorrido.
+Crea un minimapa que represente correctamente el trazado real.
+Implementa un sistema de checkpoints, vueltas, cronómetro y reinicio de posición.
+La pista y el minimapa deben compartir la misma fuente de geometría para evitar discrepancias.
+5. VEHÍCULO 1: RD SPORT COUPE
+Crea un automóvil deportivo de calle original, con proporciones realistas, diseño moderno y carrocería de aspecto premium.
+No utilices una marca real ni copies exactamente un modelo comercial.
+Características objetivo
+- Configuración: coupé de dos puertas.
+- Motor delantero.
+- Tracción trasera.
+- Masa aproximada: 1.450 kg.
+- Potencia objetivo: 320 CV.
+- Par máximo objetivo: 400 Nm.
+- Caja de cambios de seis velocidades.
+- Diferencial trasero.
+- Velocidad máxima objetivo: aproximadamente 250 km/h.
+- Suspensión independiente en ambos ejes.
+- Dirección delantera.
+- Frenos de disco.
+- Neumáticos deportivos.
+- Depósito de combustible y parámetros de consumo opcionales.
+Estas cifras son objetivos de diseño, no resultados garantizados. La aceleración y velocidad final deben surgir de la simulación y sus resistencias físicas.
+Modelo visual
+El vehículo debe tener:
+- Carrocería con silueta deportiva.
+- Capó, techo, puertas y paragolpes diferenciados.
+- Faros delanteros y traseros.
+- Parabrisas y ventanillas.
+- Espejos retrovisores.
+- Parrilla.
+- Difusor.
+- Llantas con geometría detallada.
+- Neumáticos con banda de rodadura.
+- Discos y pinzas de freno visibles.
+- Interior básico con asientos, volante, tablero y pedales.
+- Luces funcionales.
+- Suspensión parcialmente visible.
+No utilices un cubo como representación definitiva del automóvil.
+Si no hay modelos 3D disponibles, crea un modelo procedural de calidad mediante geometrías personalizadas, superficies curvas y piezas separadas. El resultado debe tener proporciones de automóvil real y no parecer un juguete geométrico.
+6. VEHÍCULO 2: RD RALLY 4X4
+Crea un vehículo original de tipo todoterreno deportivo, diseñado para circular sobre asfalto y caminos de tierra.
+Características objetivo
+- Configuración: SUV compacto de aspecto robusto.
+- Motor delantero.
+- Tracción integral.
+- Masa aproximada: 1.850 kg.
+- Potencia objetivo: 280 CV.
+- Par máximo objetivo: 400 Nm.
+- Caja automática de ocho velocidades.
+- Diferencial central o sistema equivalente de distribución de par.
+- Suspensión de mayor recorrido.
+- Neumáticos mixtos.
+- Mayor altura libre al suelo.
+- Protecciones inferiores.
+- Velocidad máxima objetivo: aproximadamente 210 km/h.
+El sistema de tracción integral debe distribuir el par entre ambos ejes. No debe limitarse a modificar visualmente las ruedas.
+Modelo visual
+Incluye:
+- Carrocería SUV original.
+- Cuatro puertas.
+- Capó y paragolpes separados.
+- Parrilla y faros.
+- Portón trasero.
+- Cristales.
+- Espejos.
+- Llantas robustas.
+- Neumáticos mixtos.
+- Guardabarros.
+- Protecciones inferiores.
+- Interior básico.
+- Luces de freno y marcha atrás.
+- Suspensión visible.
+Los dos vehículos deben tener geometría, masas, centro de gravedad, potencia, relaciones de transmisión, suspensión y comportamiento claramente diferentes.
+7. SISTEMA DE FÍSICA VEHICULAR
+Esta sección es prioritaria.
+No implementes la conducción mediante el simple desplazamiento de un modelo 3D utilizando las teclas.
+Cada vehículo debe contar con un modelo físico coherente.
+7.1. Chasis
+Implementa un cuerpo rígido con:
+- Masa configurable.
+- Centro de gravedad configurable.
+- Inercia de rotación.
+- Resistencia aerodinámica.
+- Fuerza de sustentación o carga aerodinámica configurable.
+- Resistencia a la rodadura.
+- Fuerzas de frenado.
+- Fuerzas de propulsión.
+- Transferencia de carga durante aceleración, frenado y curvas.
+Evita asignar directamente la velocidad del vehículo cada fotograma.
+Las aceleraciones deben resultar de las fuerzas aplicadas al sistema físico.
+7.2. Ruedas y suspensión
+Implementa cuatro ruedas físicas mediante un modelo de suspensión por raycast o un sistema equivalente.
+Cada rueda debe calcular:
+- Contacto con el suelo.
+- Distancia de suspensión.
+- Compresión y extensión.
+- Velocidad de compresión.
+- Fuerza elástica.
+- Amortiguación.
+- Carga normal.
+- Velocidad longitudinal.
+- Velocidad lateral.
+- Velocidad angular.
+- Par de propulsión.
+- Par de frenado.
+- Deslizamiento longitudinal.
+- Deslizamiento lateral.
+- Fuerza de fricción.
+Utiliza una curva de suspensión con rigidez y amortiguación configurables por eje.
+Las ruedas deben seguir el terreno y el chasis debe reaccionar a los desniveles.
+No permitas que las ruedas atraviesen el terreno ni que el vehículo flote artificialmente sobre la superficie.
+7.3. Neumáticos
+Implementa un modelo de neumáticos basado en fuerzas longitudinales y laterales.
+Puedes utilizar una formulación simplificada de Pacejka, una curva de fricción calibrable u otro modelo documentado.
+El modelo debe incluir:
+- Agarre dependiente de la carga.
+- Saturación de adherencia.
+- Deslizamiento lateral.
+- Deslizamiento longitudinal.
+- Pérdida progresiva de agarre.
+- Recuperación de adherencia.
+- Diferencias entre asfalto, grava y tierra.
+- Bloqueo de ruedas durante frenadas intensas.
+- Derrape y sobreviraje.
+- Subviraje.
+- Aquaplaning solo si puede implementarse de forma coherente.
+La fricción no debe ser infinita.
+Un vehículo debe poder perder el control si entra demasiado rápido en una curva o frena bruscamente.
+7.4. Dirección
+Implementa dirección basada en el ángulo de las ruedas delanteras.
+Incluye:
+- Ángulo máximo configurable.
+- Reducción del ángulo efectivo a velocidades elevadas.
+- Retorno progresivo al centro.
+- Respuesta diferenciada según la velocidad.
+- Dirección progresiva, no instantánea.
+- Posibilidad de ajustar la sensibilidad.
+Las ruedas delanteras deben girar visualmente y su orientación debe coincidir con el modelo físico.
+7.5. Motor y transmisión
+Simula el motor mediante una curva de par dependiente de las RPM.
+Implementa:
+- Régimen mínimo.
+- Régimen máximo.
+- Curva de par.
+- Potencia resultante.
+- Embrague simplificado.
+- Relaciones de caja.
+- Diferencial.
+- Cambios de marcha.
+- Limitador de revoluciones.
+- Frenado motor.
+- Respuesta progresiva del acelerador.
+- Corte de potencia durante los cambios de marcha, cuando corresponda.
+En el vehículo automático, selecciona las marchas de acuerdo con el régimen y la demanda de aceleración.
+La velocidad debe surgir de la fuerza motriz, la masa, la resistencia aerodinámica, la transmisión y el contacto de los neumáticos con el suelo.
+7.6. Frenos
+Implementa:
+- Frenado independiente por rueda.
+- Distribución de frenado entre ejes.
+- Frenado progresivo.
+- Bloqueo de ruedas cuando la fuerza de frenado supera el agarre.
+- Freno de estacionamiento.
+- ABS simplificado opcional.
+- Luces de freno vinculadas al pedal.
+El freno de estacionamiento debe permitir bloquear las ruedas traseras del coupé y facilitar los derrapes.
+7.7. Estabilidad y simulación
+Utiliza un paso fijo de simulación física.
+Implementa acumulación de tiempo y subpasos cuando sean necesarios.
+Separa la simulación física del renderizado para que la estabilidad no dependa directamente de la frecuencia de fotogramas.
+Evita correcciones artificiales que oculten los errores del modelo físico.
+Documenta los parámetros principales y proporciona valores iniciales razonables.
+8. COLISIONES Y DAÑOS VEHICULARES
+Implementa un sistema de daños progresivos.
+Importante: una simulación de cuerpo rígido no deforma automáticamente una carrocería como lo haría una estructura real. No afirmes que existe deformación estructural real si solamente se han movido piezas visuales.
+Para esta primera versión, implementa un sistema híbrido que incluya:
+- Colisiones físicas entre el vehículo y los objetos.
+- Detección de intensidad y velocidad relativa del impacto.
+- Daños por zonas de la carrocería.
+- Deformación visual localizada.
+- Paragolpes que cambian de posición o se desprenden.
+- Capó que puede deformarse visualmente.
+- Paneles que pueden desplazarse o separarse.
+- Cristales con estado de daño.
+- Luces que pueden romperse.
+- Ruedas que pueden desalinearse en impactos fuertes.
+- Dirección que puede sufrir daños simulados.
+- Suspensión con averías simuladas.
+- Pérdida de rendimiento cuando se dañan determinados componentes.
+Cada zona debe tener una resistencia configurable.
+El sistema debe utilizar los datos del impacto, no una animación aleatoria.
+Una colisión leve no debe provocar una destrucción extrema.
+Un impacto fuerte debe producir daños visuales más importantes.
+Implementa un estado de salud para componentes como radiador, motor, transmisión, suspensión y dirección.
+Los daños mecánicos deben influir en el comportamiento del vehículo.
+Añade un botón para reparar el vehículo y otro para restablecerlo completamente.
+Prioriza la consistencia física y visual por encima de una destrucción espectacular pero falsa.
+9. CÁMARAS
+Implementa las siguientes cámaras:
+1. Tercera persona detrás del vehículo.
+2. Tercera persona cercana a la carrocería.
+3. Primera persona desde el asiento del conductor.
+4. Cámara de capó.
+5. Cámara cinematográfica.
+6. Cámara libre para inspeccionar el vehículo y el escenario.
+La cámara exterior debe seguir el automóvil suavemente, sin vibraciones excesivas.
+Debe permitir orbitar alrededor del vehículo y modificar la distancia.
+La cámara interior debe mostrar un tablero básico y un volante que gire con la dirección.
+La cámara libre debe poder moverse independientemente cuando esté activada.
+Evita que la cámara atraviese paredes, el terreno o la carrocería.
+10. SONIDO
+Implementa un sistema de sonido dinámico mediante Web Audio API y recursos de audio propios o con licencias compatibles.
+Debe incluir:
+- Motor al ralentí.
+- Aceleración.
+- Cambios de marcha.
+- Frenado.
+- Derrape.
+- Impactos.
+- Suspensión.
+- Sonido ambiental.
+- Viento a velocidades elevadas.
+El sonido del motor debe variar con las RPM y la carga.
+El derrape debe depender del deslizamiento de los neumáticos.
+Los impactos deben variar según su intensidad.
+No reproduzcas constantemente un único archivo de motor sin adaptación al estado del vehículo.
+Si faltan grabaciones, crea una síntesis provisional convincente y deja una interfaz clara para sustituirla por muestras de mayor calidad.
+11. CONTROLES
+Implementa controles para teclado y ratón.
+- W o flecha arriba: acelerar.
+- S o flecha abajo: frenar y marcha atrás.
+- A y D: dirección.
+- Barra espaciadora: freno de estacionamiento.
+- C: cambiar cámara.
+- R: recuperar el vehículo.
+- T: reiniciar vehículo y daños.
+- F: encender o apagar luces.
+- V: alternar vista interior y exterior.
+- Escape: pausar.
+- Tab: mostrar u ocultar telemetría.
+Incluye una pantalla inicial con selección de vehículo.
+Permite elegir el vehículo antes de comenzar y cambiarlo desde el garaje.
+Muestra los controles en una sección de ayuda.
+Evita que el vehículo reciba aceleración cuando el usuario está escribiendo en un campo de texto.
+12. INTERFAZ
+Diseña una interfaz de calidad profesional, inspirada en instrumentación automovilística y software de simulación.
+Incluye:
+- Pantalla de inicio.
+- Botón de jugar.
+- Selección de vehículo.
+- Selección de zona de pruebas.
+- Menú de pausa.
+- Velocímetro.
+- Tacómetro.
+- Marcha actual.
+- Indicador de freno de estacionamiento.
+- Indicadores de ABS y control de estabilidad si están implementados.
+- Estado de daños.
+- Temperatura del motor simulada.
+- Minimap.
+- Cronómetro.
+- Número de vueltas.
+- Posición de los checkpoints.
+- Ajustes gráficos.
+- Ajustes de audio.
+- Sensibilidad de dirección.
+- Reinicio y reparación.
+El velocímetro debe mostrar km/h.
+La interfaz debe ser legible, discreta y no ocupar innecesariamente el campo de visión.
+Utiliza unidades coherentes y valores procedentes del estado real de la simulación.
+No muestres indicadores que no estén conectados a sistemas funcionales.
+13. TELEMETRÍA
+Implementa un panel de telemetría activable durante la conducción.
+Debe mostrar:
+- Velocidad en km/h.
+- RPM.
+- Marcha.
+- Aceleración longitudinal.
+- Aceleración lateral.
+- Velocidad angular del vehículo.
+- Ángulo de dirección.
+- Deslizamiento de cada neumático.
+- Carga aproximada por rueda.
+- Recorrido de suspensión.
+- Temperatura simulada de motor.
+- Estado de los componentes.
+- Frecuencia de renderizado.
+- Tiempo de simulación física.
+Incluye gráficos en tiempo real para aceleración, velocidad y recorrido de suspensión.
+La telemetría debe utilizar los datos calculados por el motor físico, no valores inventados.
+14. CALIDAD GRÁFICA
+Busca un aspecto de simulador automovilístico moderno.
+Implementa:
+- Iluminación ambiental.
+- Luz solar direccional.
+- Sombras.
+- Oclusión ambiental cuando sea viable.
+- Reflejos de carrocería aproximados.
+- Materiales PBR.
+- Asfalto con variaciones.
+- Marcas viales.
+- Desgaste visual.
+- Polvo.
+- Humo de neumáticos.
+- Partículas de tierra.
+- Motion blur opcional y moderado.
+- Cielo y horizonte.
+- Vegetación.
+- Señalización.
+- Iluminación de vehículos.
+- Luces de freno.
+Prioriza una buena iluminación y materiales coherentes antes de añadir efectos costosos.
+No uses cientos de luces dinámicas innecesarias.
+El renderizado debe funcionar con WebGL en navegadores compatibles.
+15. RENDIMIENTO
+Optimiza el juego para computadoras de escritorio.
+Objetivos orientativos:
+- 60 FPS en equipos modernos adecuados.
+- Física estable incluso cuando baja la frecuencia de renderizado.
+- Nivel de detalle adaptativo.
+- Instancing para elementos repetidos.
+- Geometrías compartidas cuando sea posible.
+- Gestión de memoria.
+- Sombras configurables.
+- Resolución dinámica opcional.
+- Control del número de partículas.
+- Reducción de objetos lejanos.
+- Carga progresiva de recursos.
+No intentes simular cada árbol o piedra mediante un cuerpo rígido independiente.
+Los objetos estáticos deben usar colliders eficientes.
+Limita el número de objetos dinámicos.
+Si el rendimiento es insuficiente, ofrece perfiles gráficos bajo, medio y alto.
+16. ARQUITECTURA DEL PROYECTO
+Organiza el proyecto por responsabilidades.
+Utiliza una estructura semejante a esta:
+realdrive/
+├── index.html
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+├── public/
+│   ├── assets/
+│   │   ├── vehicles/
+│   │   │   ├── sport-coupe/
+│   │   │   └── rally-4x4/
+│   │   ├── audio/
+│   │   ├── textures/
+│   │   └── environment/
+│   └── models/
+├── src/
+│   ├── main.ts
+│   ├── core/
+│   │   ├── Game.ts
+│   │   ├── Renderer.ts
+│   │   ├── SceneManager.ts
+│   │   ├── InputManager.ts
+│   │   └── TimeManager.ts
+│   ├── physics/
+│   │   ├── PhysicsWorld.ts
+│   │   ├── VehiclePhysics.ts
+│   │   ├── WheelPhysics.ts
+│   │   ├── Suspension.ts
+│   │   ├── TireModel.ts
+│   │   ├── Powertrain.ts
+│   │   └── CollisionDamage.ts
+│   ├── vehicles/
+│   │   ├── Vehicle.ts
+│   │   ├── SportCoupe.ts
+│   │   ├── Rally4x4.ts
+│   │   └── VehicleFactory.ts
+│   ├── world/
+│   │   ├── Terrain.ts
+│   │   ├── TrackGenerator.ts
+│   │   ├── TrackCollision.ts
+│   │   ├── Environment.ts
+│   │   └── Props.ts
+│   ├── cameras/
+│   │   └── CameraManager.ts
+│   ├── audio/
+│   │   └── AudioManager.ts
+│   ├── ui/
+│   │   ├── HUD.ts
+│   │   ├── MainMenu.ts
+│   │   ├── VehicleSelector.ts
+│   │   ├── Telemetry.ts
+│   │   └── Settings.ts
+│   └── styles/
+│       └── main.css
+└── README.md
+Puedes modificar esta estructura si existe una razón técnica, pero conserva la separación entre física, renderizado, vehículos, mundo, sonido e interfaz.
+No crees archivos vacíos para simular que los sistemas están implementados.
+17. PRUEBAS Y VALIDACIÓN
+Implementa pruebas para verificar el comportamiento del sistema.
+Como mínimo, verifica:
+1. El vehículo permanece apoyado sobre el terreno cuando está detenido.
+2. Las cuatro ruedas mantienen contacto razonable con una superficie plana.
+3. La suspensión responde a un desnivel.
+4. El automóvil acelera sin saltos artificiales de velocidad.
+5. La velocidad final responde a la potencia y resistencia.
+6. El vehículo gira mediante fuerzas de neumáticos.
+7. El coupé y el todoterreno tienen comportamientos diferentes.
+8. El freno de estacionamiento modifica la dinámica.
+9. Los vehículos colisionan con barreras y objetos.
+10. Los daños se corresponden con la intensidad de los impactos.
+11. La reparación restaura los componentes.
+12. El minimapa coincide con el trazado del circuito.
+13. Reiniciar el vehículo restablece una posición válida.
+14. La simulación no depende directamente de los FPS.
+15. No aparecen errores críticos en la consola.
+Añade un modo de diagnóstico que permita comprobar el contacto de las ruedas, las normales del terreno, los puntos de suspensión y las fuerzas de neumáticos.
+Incluye una prueba de estabilidad a baja velocidad, una prueba de frenado, una prueba de curva y una prueba de impacto.
+Documenta las limitaciones físicas conocidas.
+18. REGLAS IMPORTANTES DE IMPLEMENTACIÓN
+No entregues solamente un documento de diseño.
+No entregues pseudocódigo.
+No dejes funciones esenciales sin implementar.
+No uses comentarios como "TODO: implementar física" para sistemas principales.
+No reemplaces sistemas físicos por animaciones.
+No hagas que el automóvil gire sin una respuesta coherente de los neumáticos.
+No utilices un plano infinito como mundo definitivo.
+No uses modelos de automóvil con formas geométricas rudimentarias como resultado final.
+No inventes valores de telemetría.
+No ocultes errores de compilación.
+No dependas de enlaces externos inestables para recursos esenciales.
+Si utilizas recursos externos, verifica sus licencias y documenta su procedencia.
+Si no puedes crear un sistema de deformación estructural completo, implementa daños visuales localizados y daños mecánicos simplificados, identificando claramente sus limitaciones.
+Cuando una función avanzada no pueda implementarse razonablemente en esta versión, crea una alternativa funcional y deja documentado qué faltaría para mejorarla.
+19. ORDEN DE DESARROLLO
+Desarrolla el proyecto por etapas, manteniendo una versión ejecutable al terminar cada una.
+ETAPA 1: FUNDAMENTOS
+- Configuración del proyecto.
+- Escena 3D.
+- Física.
+- Terreno.
+- Primer vehículo.
+- Controles.
+- Cámara.
+- Suspensión y ruedas funcionales.
+ETAPA 2: CIRCUITO
+- Trazado completo.
+- Calzada.
+- Colisiones.
+- Barreras.
+- Señalización.
+- Zona de maniobras.
+- Minimap.
+- Checkpoints.
+ETAPA 3: SEGUNDO VEHÍCULO
+- Modelo.
+- Parámetros físicos.
+- Tracción integral.
+- Suspensión.
+- Transmisión.
+- Selección desde el garaje.
+ETAPA 4: REALISMO
+- Modelo de neumáticos.
+- Ajustes de suspensión.
+- Transferencia de peso.
+- Sonido.
+- Daños.
+- Marcas de neumáticos.
+- Polvo y humo.
+ETAPA 5: INTERFAZ Y OPTIMIZACIÓN
+- Menús.
+- Telemetría.
+- Ajustes gráficos.
+- Pruebas.
+- Corrección de errores.
+- Documentación.
+No continúes acumulando funcionalidades si la etapa anterior tiene errores críticos.
+20. FORMATO DE ENTREGA
+Primero presenta un resumen técnico de la arquitectura y las decisiones físicas.
+Después genera el proyecto completo, archivo por archivo, con el código íntegro de cada archivo.
+Si tienes acceso al sistema de archivos de un entorno de programación, crea directamente los archivos en el proyecto y ejecuta las pruebas.
+Si solo puedes responder mediante chat, entrega el código por bloques ordenados, identificando la ruta de cada archivo.
+No omitas archivos esenciales por razones de brevedad.
+Incluye:
+- package.json completo.
+- Configuración de TypeScript.
+- Configuración de Vite.
+- HTML.
+- CSS.
+- Código fuente.
+- Configuración de vehículos.
+- Generador del mundo.
+- Generador del circuito.
+- Física vehicular.
+- Controles.
+- Cámaras.
+- Interfaz.
+- Sistema de daños.
+- Sonido.
+- Pruebas.
+- README con instalación y solución de errores frecuentes.
+Proporciona comandos exactos para instalar, iniciar, probar y compilar.
+Comprueba que las importaciones y las dependencias sean correctas.
+No declares que una prueba se ha superado si no la has ejecutado.
+RESULTADO FINAL ESPERADO
+Quiero abrir el navegador, entrar en REALDRIVE, elegir entre el RD Sport Coupe y el RD Rally 4x4, aparecer en el complejo PROVING GROUNDS 01, conducir por un circuito completo, salir a zonas de tierra, derrapar, chocar contra objetos, observar daños progresivos y reparar el vehículo.
+Quiero un simulador visualmente atractivo y técnicamente sólido, con física vehicular coherente, arquitectura ampliable y una base real para desarrollar futuras versiones.
+Comienza por la ETAPA 1. Construye una versión funcional y verificable antes de ampliar el alcance.
+1. No sacrifiques la física básica por efectos visuales ni sacrifiques la jugabilidad por una arquitectura excesivamente compleja. Plant de desarrollo: Fase 1 — Prototipo de conducción
+Un vehículo, terreno, cuatro ruedas con suspensión, cámara y controles.
+
+2. Fase 2 — Primer mundo
+Circuito completo, elevaciones, barreras, conos, colisiones y minimapa.
+
+3. Fase 3 — Segundo vehículo
+Coupé y todoterreno con parámetros físicos y comportamiento diferenciados.
+
+4. Fase 4 — Realismo
+Mejoras en neumáticos, sonido, materiales, daños y telemetría.
+
+5. Fase 5 — Juego completo
+Menús, optimización, pruebas y compilación para navegador.

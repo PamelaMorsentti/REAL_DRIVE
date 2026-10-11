@@ -1,0 +1,90 @@
+.circuit-panel {
+    position: absolute;
+    top: 82px;
+    left: 28px;
+    width: 214px;
+    padding: 10px 12px 8px;
+}
+
+.circuit-heading,
+.circuit-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: #a8b9c0;
+    font-size: 9px;
+    letter-spacing: .08em;
+}
+
+.circuit-heading strong {
+    color: #68e0c1;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+#circuit-map {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 5px 0 4px;
+    overflow: visible;
+}
+
+#track-map {
+    fill: none;
+    stroke: #75858a;
+    stroke-width: 13;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#checkpoint-markers circle {
+    fill: #25383a;
+    stroke: #b2c1c2;
+    stroke-width: .7;
+}
+
+#checkpoint-markers .start-dot {
+    fill: #f0f2e8;
+    stroke: #68e0c1;
+}
+
+#checkpoint-markers .is-next {
+    fill: #68e0c1;
+    stroke: #fff;
+    stroke-width: 1.1;
+}
+
+#player-marker {
+    fill: #ffcc66;
+    stroke: #101820;
+    stroke-width: .65;
+    filter: drop-shadow(0 0 1.5px #101820);
+}
+
+.circuit-footer {
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    padding-top: 6px;
+    color: #8fa2aa;
+}
+
+.circuit-footer time {
+    color: #edf3f5;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 700px) {
+    .circuit-panel {
+        top: 72px;
+        left: 12px;
+        width: 164px;
+        padding: 8px 9px 7px;
+    }
+
+    .circuit-heading,
+    .circuit-footer,
+    .circuit-heading strong {
+        font-size: 8px;
+    }
+}
