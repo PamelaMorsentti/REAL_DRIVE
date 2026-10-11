@@ -10,8 +10,8 @@ const app = document.querySelector<HTMLDivElement>('#app')!;
 const engineAudio = new EngineAudio();
 app.innerHTML = `
 <div class="hud"><div class="brand">REAL<span>DRIVE</span><span class="sub">VEHICLE DYNAMICS LAB · BUILD 0.1</span></div>
-<div class="help"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> conducir &nbsp; <kbd>ESPACIO</kbd> freno mano &nbsp; <kbd>C</kbd> cámara &nbsp; <kbd>R</kbd> recuperar</div>
-<div class="panel telemetry"><div class="eyebrow">TELEMETRÍA EN TIEMPO REAL</div><div class="speedline"><div class="speed" id="speed">000</div><div class="unit">KM/H</div></div><div class="rpmbar"><span id="rpmbar"></span></div><div class="metricrow"><span>RÉGIMEN</span><strong id="rpm">850 RPM</strong></div><div class="metricrow"><span>TRANSMISIÓN</span><strong id="gear">N</strong></div><div class="metricrow"><span>ACELERACIÓN</span><strong id="accel">0.00 m/s²</strong></div><div class="metricrow"><span>SUPERFICIE</span><strong id="surface">ASFALTO</strong></div><div class="metricrow"><span>SIMULACIÓN</span><strong id="sim">ACTIVA</strong></div></div>
+<div class="help"><kbd>WASD</kbd> conducir · <kbd>Q/E</kbd> marchas · <kbd>M</kbd> caja · <kbd>ESPACIO</kbd> freno · <kbd>C</kbd> cámara · <kbd>R</kbd> recuperar</div>
+<div class="panel telemetry"><div class="eyebrow">TELEMETRÍA EN TIEMPO REAL</div><div class="speedline"><div class="speed" id="speed">000</div><div class="unit">KM/H</div></div><div class="rpmbar"><span id="rpmbar"></span></div><div class="metricrow"><span>RÉGIMEN</span><strong id="rpm">850 RPM</strong></div><div class="metricrow"><span>TRANSMISIÓN</span><strong id="gear">N</strong></div><div class="metricrow"><span>CAJA</span><strong id="transmission-mode">AUTO</strong></div><div class="metricrow"><span>ACELERACIÓN</span><strong id="accel">0.00 m/s²</strong></div><div class="metricrow"><span>SUPERFICIE</span><strong id="surface">ASFALTO</strong></div><div class="metricrow"><span>SIMULACIÓN</span><strong id="sim">ACTIVA</strong></div></div>
 <div class="panel vehicle-tag"><div class="eyebrow">VEHÍCULO ACTUAL · <span id="vehicle-drive">RWD</span></div><div class="vehicle-name" id="vehicle-name">RD SPORT COUPE</div><div class="vehicle-desc" id="vehicle-desc">1.450 kg · 320 CV · TRACCIÓN TRASERA</div><div class="vehicle-switch" role="group" aria-label="Seleccionar vehículo"><button id="select-coupe" type="button" aria-pressed="true">1 · COUPÉ</button><button id="select-rally" type="button" aria-pressed="false">2 · RALLY 4X4</button></div></div>
 <div class="panel circuit-panel"><div class="circuit-heading"><span>PROVING GROUNDS 01</span><strong id="lap-count">VUELTA 01</strong></div><svg id="circuit-map" viewBox="-100 -70 200 140" role="img" aria-label="Minimapa del circuito"><polyline id="track-map"/><g id="checkpoint-markers"></g><path id="player-marker" d="M 0 -4 L 2.5 2.5 L 0 1 L -2.5 2.5 Z"/></svg><div class="circuit-footer"><span id="checkpoint-status">CP 0 / 3</span><time id="lap-time">00:00.0</time></div></div>
 <div class="status"><b>● SISTEMA ACTIVO</b><br>PROVING GROUNDS · TEST PAD 01<br><span id="fps">-- FPS</span> &nbsp; · &nbsp; <span id="camera">CHASE CAM</span></div><div class="vignette"></div><div class="toast" id="toast">VEHÍCULO RECUPERADO</div></div>`;
@@ -254,8 +254,8 @@ const vehicleProfiles = {
         cameraEye: new THREE.Vector3(0, 1.88, -1.45), cameraLook: new THREE.Vector3(0, 1.35, -24),
         physics: {
             mass: 1450, wheelRadius: .37, wheelInertia: 1.65, suspensionRest: .48, suspensionTravel: .22,
-            springRate: 42_000, damperRate: 3_600, peakTorque: 400, finalDrive: 3.12,
-            gearRatios: [2.96, 2.04, 1.48, 1.14, .91, .74], maxRpm: 7_400,
+            springRate: 42_000, damperRate: 3_600, peakTorque: 400, finalDrive: 3.35,
+            gearRatios: [3.35, 2.42, 1.8, 1.37, 1.04, .79], maxRpm: 7_400,
             maxSteeringAngle: .56, brakeTorque: 2_150, handbrakeTorque: 2_850,
             dragCoefficient: .68, rollingResistance: .014,
             surfaceGrip: (x: number, z: number) => isOnAsphalt(x, z) ? 1.08 : .76,
@@ -299,8 +299,9 @@ const previousCollisionHandles = new Set<number>();
 const vehicle = { x: 0, y: 0.1, z: -52, yaw: -Math.PI / 2, speed: 0, rpm: 850, gear: 1, accel: 0 };
 const race = { completedLaps: 0, nextCheckpoint: 0, checkpointsPassed: 0, started: false, startedAt: 0, lastLapSeconds: 0 };
 let previousPosition = new THREE.Vector2(vehicle.x, vehicle.z);
-const state = { throttle: 0, brake: 0, steer: 0, handbrake: false, reverse: false, cam: 0, paused: false, speed: 0, rpm: 850, gear: 1, accel: 0, lastSpeed: 0, damage: 0 };
+const state = { throttle: 0, brake: 0, steer: 0, handbrake: false, reverse: false, manual: false, cam: 0, paused: false, speed: 0, rpm: 850, gear: 1, accel: 0, lastSpeed: 0, damage: 0 };
 const keys = new Set<string>();
+let pendingGearChange: -1 | 0 | 1 = 0;
 window.addEventListener('keydown', e => {
     engineAudio.unlock();
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
@@ -310,6 +311,13 @@ window.addEventListener('keydown', e => {
         state.cam = (state.cam + 1) % 3;
         document.querySelector('#camera')!.textContent = ['CHASE CAM', 'DRIVER CAM', 'ORBIT CAM'][state.cam];
     }
+    if (e.key.toLowerCase() === 'm') {
+        state.manual = !state.manual;
+        document.querySelector('#transmission-mode')!.textContent = state.manual ? 'MANUAL' : 'AUTO';
+        toast(state.manual ? 'CAJA MANUAL' : 'CAJA AUTOMÁTICA');
+    }
+    if (state.manual && e.key.toLowerCase() === 'q') pendingGearChange = -1;
+    if (state.manual && e.key.toLowerCase() === 'e') pendingGearChange = 1;
     if (e.key === '1') selectVehicle('coupe');
     if (e.key === '2') selectVehicle('rally');
     if (e.key.toLowerCase() === 'r') recover();
@@ -323,6 +331,7 @@ function recover() {
     vehicle.x = 0; vehicle.y = 0.1; vehicle.z = -52; vehicle.yaw = -Math.PI / 2; vehicle.speed = 0; vehicle.rpm = 850; vehicle.gear = 1; vehicle.accel = 0;
     vehiclePhysics?.reset(new THREE.Vector3(vehicle.x, vehicle.y, vehicle.z), vehicle.yaw);
     state.reverse = false;
+    pendingGearChange = 0;
     previousCollisionHandles.clear();
     previousPosition.set(vehicle.x, vehicle.z);
     race.nextCheckpoint = 0; race.checkpointsPassed = 0; race.started = false; race.startedAt = 0;
@@ -496,7 +505,10 @@ async function init() {
         const steerInput = (keys.has('a') || keys.has('arrowleft') ? 1 : 0) + (keys.has('d') || keys.has('arrowright') ? -1 : 0);
         state.steer = THREE.MathUtils.damp(state.steer, steerInput, 4.2, dt);
         state.handbrake = keys.has(' ');
-        vehiclePhysics.step({ steering: state.steer, throttle: state.throttle, brake: state.brake, handbrake: state.handbrake, reverse: state.reverse }, dt);
+        const gearChange = pendingGearChange;
+        pendingGearChange = 0;
+        const previousGear = state.gear;
+        vehiclePhysics.step({ steering: state.steer, throttle: state.throttle, brake: state.brake, handbrake: state.handbrake, reverse: state.reverse, manual: state.manual, gearChange }, dt);
         const snapshot = vehiclePhysics.getSnapshot();
         vehicle.x = snapshot.position.x;
         vehicle.y = snapshot.position.y;
@@ -510,9 +522,8 @@ async function init() {
         vehicle.accel = snapshot.longitudinalG * 9.81;
         state.speed = snapshot.speedKmh;
         state.rpm = snapshot.rpm;
-        const previousGear = state.gear;
         state.gear = typeof snapshot.gear === 'number' ? snapshot.gear : 1;
-        if (state.gear !== previousGear && state.throttle) engineAudio.playGearShift();
+        if (state.gear !== previousGear && (state.throttle || state.manual)) engineAudio.playGearShift();
         state.accel = vehicle.accel;
 
         const newContacts: RAPIER.Collider[] = [];
@@ -563,7 +574,7 @@ async function init() {
         const slipAmount = snapshot ? Math.min(1, snapshot.wheels.reduce((maximum, wheel) => Math.max(maximum, Math.abs(wheel.slipAngle) / 1.15), 0)) : 0;
         engineAudio.update(state.rpm, state.throttle, vehicle.speed, activeVehicleId, slipAmount);
         document.querySelector('#rpmbar')!.setAttribute('style', `width:${Math.min(100, (state.rpm / activeProfile.physics.maxRpm) * 100)}%`);
-        document.querySelector('#gear')!.textContent = vehicle.speed < -.4 || state.reverse ? 'R' : state.brake ? 'B' + state.gear : state.throttle || state.speed > .5 ? 'D' + state.gear : 'N';
+        document.querySelector('#gear')!.textContent = vehicle.speed < -.4 || state.reverse ? 'R' : state.manual ? `M${state.gear}` : state.brake ? 'B' + state.gear : state.throttle || state.speed > .5 ? 'D' + state.gear : 'N';
         document.querySelector('#accel')!.textContent = `${state.accel.toFixed(2)} m/s²`;
         document.querySelector('#surface')!.textContent = isOnAsphalt(vehicle.x, vehicle.z) ? 'ASFALTO' : 'TIERRA';
         document.querySelector('#lap-count')!.textContent = `VUELTA ${String(race.completedLaps + 1).padStart(2, '0')}`;

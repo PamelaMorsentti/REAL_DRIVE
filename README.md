@@ -26,6 +26,8 @@ npm run dev
 - A / flecha izquierda: girar a la izquierda
 - D / flecha derecha: girar a la derecha
 - Espacio: freno de estacionamiento
+- M: alternar transmisión automática/manual
+- E / Q: subir / bajar una marcha en modo manual
 - C: cambiar entre cámara trasera, conductor y órbita
 - R: recuperar vehículo
 - 1 / 2: seleccionar coupé / Rally 4x4
@@ -38,13 +40,14 @@ npm run dev
 - Óvalo de pruebas con minimapa generado desde su trazado, línea de salida, tres checkpoints y cronómetro básico de vueltas.
 - Los checkpoints requieren cruzar las puertas en orden y en el sentido del circuito. El óvalo tiene barreras laterales y el recinto incluye barreras y conos con colliders Rapier; ahora el chasis dinámico recibe los contactos.
 - RD Sport Coupe y RD Rally 4x4 procedurales, seleccionables desde el HUD o con 1/2. El Coupé usa RWD y el Rally distribuye par entre sus cuatro ruedas con perfiles separados; aún no hay diferencial central modelado.
+- El Coupé tiene una curva de par más llena a bajas RPM y relaciones más cortas para mejorar la salida y la aceleración. La transmisión permite alternar entre cambios automáticos y manuales.
 - Los bordes del óvalo usan fardos visuales deformables: el primer impacto los aplasta, frena el vehículo y desactiva su collider para dejar paso. Es una respuesta arcade, no deformación/material blando simulado.
 - Rapier simula un chasis dinámico, raycasts de suspensión, carga normal y fuerzas longitudinales/laterales limitadas por adherencia. No incluye todavía transferencia de peso avanzada, curva Pacejka, ABS ni daño mecánico.
 - Audio Web Audio habilitado tras interacción: el Coupé usa un timbre agudo y armónico; el Rally tiene pulso grave y silbido turbo. Se añaden viento por velocidad, tono de cambio e impactos de distinta intensidad.
 - El chillido de neumáticos es una síntesis aproximada a partir de dirección, velocidad y freno de mano; no procede aún de una medida física de slip.
 - La cámara del conductor se coloca dentro del parabrisas; chase y órbita conservan el seguimiento exterior.
 - Los modelos visuales son procedurales y no equivalen todavía a un modelo CAD/GLB de alta fidelidad.
-- Prueba de humo: con Vite en marcha, abrir `/tests/physics-smoke.html` para comprobar aceleración, dirección, cuatro ruedas apoyadas y frenado.
+- Prueba de humo: con Vite en marcha, abrir `/tests/physics-smoke.html` para comprobar aceleración, dirección, cuatro ruedas apoyadas, frenado y cambios manuales.
 - Daño progresivo, deformación estructural, físicas vehiculares completas y circuito definitivo permanecen pendientes.
 
 ## Compilar

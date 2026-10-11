@@ -7,6 +7,8 @@ export interface DriverInput {
     brake: number;
     handbrake: boolean;
     reverse: boolean;
+    manual: boolean;
+    gearChange: -1 | 0 | 1;
 }
 
 export interface WheelMount {
@@ -76,9 +78,9 @@ function toRapier(vector: THREE.Vector3): RAPIER.Vector {
 }
 
 function torqueAtRpm(rpm: number, peakTorque: number, maxRpm: number) {
-    const rise = THREE.MathUtils.smoothstep(rpm, 850, maxRpm * .52);
-    const fall = THREE.MathUtils.smoothstep(rpm, maxRpm * .7, maxRpm);
-    return THREE.MathUtils.clamp(peakTorque * (.68 + rise * .32 - fall * .23), peakTorque * .55, peakTorque);
+    const rise = THREE.MathUtils.smoothstep(rpm, 850, maxRpm * .44);
+    const fall = THREE.MathUtils.smoothstep(rpm, maxRpm * .76, maxRpm);
+    return THREE.MathUtils.clamp(peakTorque * (.85 + rise * .15 - fall * .2), peakTorque * .6, peakTorque);
 }
 
 export class VehiclePhysics {
@@ -103,7 +105,7 @@ export class VehiclePhysics {
     private shiftCooldown = 0;
     private longitudinalG = 0;
     private lateralG = 0;
-    private lastInput: DriverInput = { steering: 0, throttle: 0, brake: 0, handbrake: false, reverse: false };
+    private lastInput: DriverInput = { steering: 0, throttle: 0, brake: 0, handbrake: false, reverse: false, manual: false, gearChange: 0 };
 
     constructor(
         private readonly world: RAPIER.World,
@@ -175,7 +177,14 @@ export class VehiclePhysics {
         const targetRpm = THREE.MathUtils.clamp(Math.max(850, projectedRpm) + input.throttle * 650, 850, this.config.maxRpm);
         this.engineRpm = THREE.MathUtils.damp(this.engineRpm, targetRpm, 8.5, dt);
 
-        if (this.shiftCooldown <= 0 && !input.reverse) {
+        if (this.shiftCooldown <= 0 && !input.reverse && input.manual && input.gearChange !== 0) {
+            const nextGear = THREE.MathUtils.clamp(this.gear + input.gearChange, 1, this.config.gearRatios.length);
+            const nextRpm = planarSpeed / this.config.wheelRadius * this.config.gearRatios[nextGear - 1] * this.config.finalDrive * (60 / (Math.PI * 2));
+            if (nextGear > this.gear || nextRpm < this.config.maxRpm * .96) {
+                this.gear = nextGear;
+                this.shiftCooldown = .28;
+            }
+        } else if (this.shiftCooldown <= 0 && !input.reverse && !input.manual) {
             if (this.engineRpm > this.config.maxRpm * .9 && this.gear < this.config.gearRatios.length) {
                 this.gear += 1;
                 this.shiftCooldown = .42;
